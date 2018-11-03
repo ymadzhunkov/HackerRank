@@ -26,9 +26,9 @@ add_test(
 )
 SET_TESTS_PROPERTIES(${PROJECT_NAME}_check0 
                      PROPERTIES DEPENDS ${PROJECT_NAME}_run0)
-#add_unit_test(
-#    PROJECT_NAME ${PROJECT_NAME} 
-#    TEST_SOURCES
-#        "test/problem.cpp"
-#    LINK_LIBS ${PROJECT_NAME})
+add_unit_test(
+    PROJECT_NAME ${PROJECT_NAME} 
+    TEST_SOURCES
+       "test/Range.cpp"
+    LINK_LIBS ${PROJECT_NAME})
 
