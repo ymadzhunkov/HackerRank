@@ -1,8 +1,9 @@
 #pragma once
+#include <cstdint>
 
 class Range {
   public:
-    Range() : min(0), max(0) {}
+    Range() : min(INT64_MAX), max(INT64_MIN) {}
     Range &add(int64_t v) {
         if (v < min) min = v;
         if (v > max) max = v;
