@@ -1,5 +1,6 @@
 #include <bits/stdc++.h>
-
+#include "problem.h"
+#include "Range.h"
 using namespace std;
 
 vector<string> split_string(string);
@@ -34,7 +35,8 @@ int main() {
 
     health[i] = health_item;
   }
-
+  Problem problem(std::move(genes), std::move(health));
+  Range res;
   int s;
   cin >> s;
   cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -50,8 +52,9 @@ int main() {
     int last = stoi(firstLastd[1]);
 
     string d = firstLastd[2];
+    res.add(problem.sum_health(first, last, d));
   }
-  cout << "0 19" << endl;
+  cout << res.min << " " << res.max << endl;
   return EXIT_SUCCESS;
 }
 
