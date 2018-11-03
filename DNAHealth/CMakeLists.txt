@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 2.8.12)
 get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 project(${PROJECT_NAME})
 
-set(SOURCES src/problem.cpp)
+set(SOURCES 
+    src/problem.cpp
+    src/CyclicHash.cpp
+)
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC include)
@@ -30,5 +33,6 @@ add_unit_test(
     PROJECT_NAME ${PROJECT_NAME} 
     TEST_SOURCES
        "test/Range.cpp"
+       "test/CyclicHash.cpp"
     LINK_LIBS ${PROJECT_NAME})
 
