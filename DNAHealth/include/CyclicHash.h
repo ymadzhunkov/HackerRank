@@ -50,6 +50,7 @@ class CyclicHash {
     }
 
     uint32_t init(const char *a) {
+        hashvalue = 0;
         for (uint32_t k = 0; k < n; ++k) eat(a[k]);
         return hashvalue;
     }
