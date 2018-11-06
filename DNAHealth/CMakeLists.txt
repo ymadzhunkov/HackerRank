@@ -13,6 +13,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC include)
 add_executable(${PROJECT_NAME}_main src/main.cpp)
 target_link_libraries(${PROJECT_NAME}_main PRIVATE ${PROJECT_NAME}) 
 
+add_executable(generator src/generator.cpp)
+
 
 add_test(NAME ${PROJECT_NAME}_run0 COMMAND 
     ${CMAKE_COMMAND} 
