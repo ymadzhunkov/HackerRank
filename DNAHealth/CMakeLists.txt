@@ -15,7 +15,7 @@ target_link_libraries(${PROJECT_NAME}_main PRIVATE ${PROJECT_NAME})
 
 add_executable(generator src/generator.cpp)
 
-foreach(sample 01 02) 
+foreach(sample 01 02 03) 
     add_test(NAME ${PROJECT_NAME}_run${sample} COMMAND 
         ${CMAKE_COMMAND} 
         -DEXECUTABLE=$<TARGET_FILE:${PROJECT_NAME}_main>
@@ -23,9 +23,9 @@ foreach(sample 01 02)
         -DOUT_FILE=${CMAKE_CURRENT_BINARY_DIR}/sample${sample}.out
         -P ${CMAKE_SOURCE_DIR}/cmake/exec.cmake
     )
-    set_tests_properties(${PROJECT_NAME}_run${sample} PROPERTIES 
-        TIMEOUT 3
-    ) 
+#set_tests_properties(${PROJECT_NAME}_run${sample} PROPERTIES 
+#        TIMEOUT 3
+#    ) 
 
     add_test(
         NAME ${PROJECT_NAME}_check${sample} 
@@ -40,8 +40,9 @@ endforeach()
 add_unit_test(
     PROJECT_NAME ${PROJECT_NAME} 
     TEST_SOURCES
-       "test/Range.cpp"
        "test/CyclicHash.cpp"
        "test/Problem.cpp"
+       "test/Range.cpp"
+       "test/SumTree.cpp"
     LINK_LIBS ${PROJECT_NAME})
 

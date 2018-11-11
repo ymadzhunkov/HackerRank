@@ -9,13 +9,14 @@ Problem::Problem(std::vector<std::string> &&genes_,
     for (auto &v : table) v = -1;
     for (int i = 0; i < genes.size(); i++) {
         if (genes[i].size() >= 4)
-            add(hf.init(genes[i].c_str()), i); 
-        else 
-            small.push_back(i);
+            add_big(i);
+        else
+            add_small(i);
     }
 }
 
-bool Problem::add(int key, int val) {
+bool Problem::add_big(int val) {
+    auto key = hf.init(genes[val].c_str());
     for (size_t i = key; i < table.size(); i++)
         if (table[i] < 0) {
             table[i] = val;
@@ -27,6 +28,22 @@ bool Problem::add(int key, int val) {
             return true;
         }
     return false;
+}
+
+int Problem::code_small(const std::string &gene) const {
+    int index = gene[0] - 'a';
+    index *= 27;
+    if (gene.length() > 1) 
+        index += 1 + gene[1] - 'a';
+    index *= 27;
+    if (gene.length() > 2) 
+        index += 1 + gene[2] - 'a';
+    return index;
+}
+
+bool Problem::add_small(int i) { 
+    int code = code_small(genes[i]);
+    small_table[code].add(i, health[i]);
 }
 
 uint32_t next(const uint32_t v) {
@@ -54,30 +71,49 @@ bool Problem::match(const int ind, const char *dna) const {
                    genes[ind].length()) == 0;
 }
 
-int64_t Problem::sum_small(const int from, const int to,
-                           const std::string &dna) {
-    int64_t res = 0;
-    for (size_t i = 0; i < dna.length(); i++)
-        for (const auto &ind : small)
-            if (ind >= from && ind <= to) {
-                if (match(ind, &dna[i]))
-                    res += health[ind];
-            }
-    return res;
+
+void Problem::feed(const char c, const int from,
+                   const int to, int64_t &res) {
+    if (p2 != '\0') {
+        int index = p2 - 'a';
+        index *= 27;
+        index += 1 + p1 - 'a';
+        index *= 27;
+        index += 1 + c - 'a';
+        res += small_table[index].sum_range(from, to);
+    }
+    if (p1 != '\0') {
+        int index = p1 - 'a';
+        index *= 27;
+        index += 1 + c - 'a';
+        index *= 27;
+        res += small_table[index].sum_range(from, to);
+    }
+    { 
+        int index = c - 'a';
+        index *= 27 * 27;
+        res += small_table[index].sum_range(from, to);
+    }
+    p2 = p1;
+    p1 = c;
 }
 
 int64_t Problem::sum_health(const int from, const int to,
                             const std::string &dna) {
 
+    p1 = '\0';
+    p2 = '\0';
     int64_t res = 0;
     if (dna.length() >= 4) {
         auto v = hf.init(dna.c_str());
         for (size_t i = 0; i < dna.length() - 4; i++) {
+            feed(dna[i], from, to, res);
             res += check(v, &dna[i], from, to);
             v = hf.update(dna[i], dna[i + 4]);
         }
         res += check(v, &dna[dna.length() - 4], from, to);
     }
-    res += sum_small(from, to, dna);
+    for (size_t i = dna.length() - 4; i < dna.length(); i++)
+        feed(dna[i], from, to, res);
     return res;
 }
