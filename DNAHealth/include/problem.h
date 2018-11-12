@@ -16,6 +16,7 @@ class Problem {
   private:
     bool match (const int ind, const char * dna) const;
     bool add_big(int val);
+    bool add_big(int key, int val);
     bool add_small(int val);
     uint32_t check(uint32_t hash, const char *dna,
                    const int from, const int to) const;

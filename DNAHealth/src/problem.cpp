@@ -15,18 +15,20 @@ Problem::Problem(std::vector<std::string> &&genes_,
     }
 }
 
+bool Problem::add_big(int key, int val) {
+    if (table[key] < 0) {
+        table[key] = val;
+        return true;
+    }
+    return false;
+}
+
 bool Problem::add_big(int val) {
     auto key = hf.init(genes[val].c_str());
     for (size_t i = key; i < table.size(); i++)
-        if (table[i] < 0) {
-            table[i] = val;
-            return true;
-        }
+        if (add_big(i, val)) return true;
     for (size_t i = 0; i < key; i++)
-        if (table[i] < 0) {
-            table[i] = val;
-            return true;
-        }
+        if (add_big(i, val)) return true;
     return false;
 }
 
@@ -54,15 +56,10 @@ uint32_t Problem::check(uint32_t hash, const char *dna,
                         const int from,
                         const int to) const {
     uint32_t res = 0;
-    if (table[hash] >= 0) {
-        for (auto j = table[hash]; j >= 0;
-             j = table[(hash = next(hash))]) {
-            if (j >= from && j <= to) {
-                if (match(j, dna))
-                    res += health[j];
-            }
-        }
-    }
+    for (auto j = table[hash]; j >= 0;
+         j = table[(hash = next(hash))])
+        if (j >= from && j <= to)
+            if (match(j, dna)) res += health[j];
     return res;
 }
 
