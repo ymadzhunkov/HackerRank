@@ -1,12 +1,12 @@
 #include "problem.h"
-#include <iostream>
 #include <cstring>
+#include <iostream>
 
 Problem::Problem(std::vector<std::string> &&genes_,
                  std::vector<int> &&health_)
     : genes(std::move(genes_)), health(std::move(health_)),
+      table(*new (std::array<SumTree, 1 << 20>)),
       hf(4, 20) {
-    for (auto &v : table) v = -1;
     for (int i = 0; i < genes.size(); i++) {
         if (genes[i].size() >= 4)
             add_big(i);
@@ -15,12 +15,17 @@ Problem::Problem(std::vector<std::string> &&genes_,
     }
 }
 
-bool Problem::add_big(int key, int val) {
-    if (table[key] < 0) {
-        table[key] = val;
+bool Problem::check_add_big(int key, int val) const {
+    if (table[key].is_empty()) return true;
+    if (match(table[key].sample(), genes[val].c_str()))
         return true;
-    }
     return false;
+}
+
+bool Problem::add_big(int key, int val) {
+    bool res = check_add_big(key, val);
+    if (res) table[key].add(val, health[val]);
+    return res;
 }
 
 bool Problem::add_big(int val) {
@@ -35,15 +40,13 @@ bool Problem::add_big(int val) {
 int Problem::code_small(const std::string &gene) const {
     int index = gene[0] - 'a';
     index *= 27;
-    if (gene.length() > 1) 
-        index += 1 + gene[1] - 'a';
+    if (gene.length() > 1) index += 1 + gene[1] - 'a';
     index *= 27;
-    if (gene.length() > 2) 
-        index += 1 + gene[2] - 'a';
+    if (gene.length() > 2) index += 1 + gene[2] - 'a';
     return index;
 }
 
-bool Problem::add_small(int i) { 
+bool Problem::add_small(int i) {
     int code = code_small(genes[i]);
     small_table[code].add(i, health[i]);
 }
@@ -55,11 +58,13 @@ uint32_t next(const uint32_t v) {
 uint32_t Problem::check(uint32_t hash, const char *dna,
                         const int from,
                         const int to) const {
+
     uint32_t res = 0;
-    for (auto j = table[hash]; j >= 0;
-         j = table[(hash = next(hash))])
-        if (j >= from && j <= to)
-            if (match(j, dna)) res += health[j];
+    for (; !table[hash].is_empty(); hash = next(hash)) {
+        auto h = table[hash].sum_range(from, to);
+        if (h > 0)
+            if (match(table[hash].sample(), dna)) res += h;
+    }
     return res;
 }
 
@@ -67,7 +72,6 @@ bool Problem::match(const int ind, const char *dna) const {
     return strncmp(genes[ind].c_str(), dna,
                    genes[ind].length()) == 0;
 }
-
 
 void Problem::feed(const char c, const int from,
                    const int to, int64_t &res) {
@@ -86,7 +90,7 @@ void Problem::feed(const char c, const int from,
         index *= 27;
         res += small_table[index].sum_range(from, to);
     }
-    { 
+    {
         int index = c - 'a';
         index *= 27 * 27;
         res += small_table[index].sum_range(from, to);
